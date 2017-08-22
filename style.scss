@@ -1,0 +1,14 @@
+.form {
+  &__input {
+
+    &_error {
+      border: 1px solid red;
+    }
+  }
+  &__btn {
+
+    &_disable {
+      pointer-events: none;
+    }
+  }
+}
