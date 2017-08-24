@@ -1,0 +1,25 @@
+{
+  "name": "nodejsschool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "http-server": "^0.10.0",
+    "node-static": "^0.7.9"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuliko111/NodeJsSchool.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yuliko111/NodeJsSchool/issues"
+  },
+  "homepage": "https://github.com/yuliko111/NodeJsSchool#readme"
+}
