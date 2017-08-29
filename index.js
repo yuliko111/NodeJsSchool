@@ -18,34 +18,66 @@ class Helper {
 }
 
 class Validate {
-    validateFio (data){
-        const fioArr = data.fio.split(' ');
+    validateFio (fio){
+        const fioArr = fio.split(' ');
         const fioResultArr = fioArr.filter((item)=>{//TODO filter
            return item.length;
         });
-        return (fioResultArr.length === 3);
+
+        let result;
+
+        fioResultArr.forEach(word => {
+            if (/^[^0-9!-_+\.\$]+$/.test(word)) {
+                return result = true;
+            } else {
+                return result = false;
+            }
+        });
+
+        return (fioResultArr.length === 3 && result);
     }
 
-    validatePhone (data) {
-        let phoneNumber = data.phone;
-        let validNumber = phoneNumber.replace(/[^0-9]+/g, '');
+    validatePhone (phone) {
+        let validNumber = phone.replace(/[^0-9]+/g, '');
+
         let arrNumber = validNumber.split('');
-        let result = arrNumber.reduce(function(sum, current) {
+        let result2;
+
+        if (arrNumber.length === 16 // TODO replace arrNumber to phone.split('')
+            && arrNumber[0] === '+'
+            && arrNumber[1] === '7'
+            && arrNumber[2] === '('
+            && arrNumber[6] === ')'
+            && arrNumber[10] === '-'
+            && arrNumber[13] === '-'
+        ){
+            result2 = true;
+        }
+
+        let resultSum = arrNumber.reduce(function(sum, current) {
             return parseInt(sum, 10) + parseInt(current, 10);
         }, 0);
-        // self.value(validNumber);
-        return (result <= 30);
+
+        return (resultSum <= 30 && result2);
     }
 
-    validateEmail (data) {
-        let mailName = data.email.split('@')[0];
-        let mailDomen = data.email.split('@')[1];
+    validateEmail (email) {
+        let mailName = email.split('@')[0];
+        let mailDomen = email.split('@')[1];
+
+        let resultName = mailName.length ? true: false;
         // TODO switch
-        // console.log('email is valid?', (mailDomen === 'ya.ru' || mailDomen === 'yandex.ru' || mailDomen === 'yandex.ua' || mailDomen === 'yandex.by' || mailDomen === 'yandex.kz' || mailDomen === 'yandex.com'));
-        return (mailDomen === 'ya.ru' || mailDomen === 'yandex.ru' || mailDomen === 'yandex.ua' || mailDomen === 'yandex.by' || mailDomen === 'yandex.kz' || mailDomen === 'yandex.com');
+        let resultDomen = mailDomen === 'ya.ru' || mailDomen === 'yandex.ru' || mailDomen === 'yandex.ua' || mailDomen === 'yandex.by' || mailDomen === 'yandex.kz' || mailDomen === 'yandex.com';
+        return (resultDomen && resultName);
     }
 }
-
+function unitTest(func, res, name){
+    if (func === res) {
+        console.log('%c success ' + name, 'color: green');
+    } else {
+        console.log('%c failed ' + name, 'color: red');
+    }
+}
 class API {
     sendForm (form, submitBtn, resultNode) {
         const formAction = form.getAttribute('action');
@@ -98,13 +130,13 @@ let MyForm = {
             errorFields: []
         };
 
-        if (!validate.validateFio(data)) {
+        if (!validate.validateFio(data.fio)) {
             resultValid.errorFields.push('fio');
         }
-        if (!validate.validatePhone(data)) {
+        if (!validate.validatePhone(data.phone)) {
             resultValid.errorFields.push('phone');
         }
-        if (!validate.validateEmail(data)) {
+        if (!validate.validateEmail(data.email)) {
             resultValid.errorFields.push('email');
         }
 
@@ -148,8 +180,50 @@ let MyForm = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    // MyForm.setData({fio: '  Иванов Иван    Иванович Иванович', phone: '+928347892 dskjf', email: 'kasjdas@ya.ru'});
-    MyForm.setData({fio: 'Иванов Иван Иванович', phone: '+7123456', email: 'kasjdas@ya.ru'});
+
+    // ----- фио ------
+
+/*    unitTest(validate.validateFio('  Иванов Иван    Иванович '), true, `validate.validateFio('  Иванов Иван    Иванович ')`);
+    unitTest(validate.validateFio('  Иванов Иван    Иванович Иванович'), false, `validate.validateFio('  Иванов Иван    Иванович Иванович')`);
+    unitTest(validate.validateFio(''), false, `validate.validateFio('')`);
+    unitTest(validate.validateFio(' '), false, `validate.validateFio(' ')`);
+    unitTest(validate.validateFio('+ 209 ---'), false, `validate.validateFio('+ 209 ---')`);
+    unitTest(validate.validateFio('123 123 123'), false, `validate.validateFio('123 123 123')`);
+    unitTest(validate.validateFio('+ ++ +'), false, `validate.validateFio('+ ++ +')`);
+    unitTest(validate.validateFio('- - -'), false, `validate.validateFio('- - -')`);*/
+
+    // ----- неверный телефон ------
+
+    unitTest(validate.validatePhone('+7(111)111-11-11'), true, `validate.validatePhone('+7(111)111-11-11')`);
+    unitTest(validate.validatePhone('+71111111111'), false, `validate.validatePhone('+71111111111')`); // TODO !!!
+    unitTest(validate.validatePhone('kasj kasjd kjd'), false, `validate.validatePhone('kasj kasjd kjd')`); // TODO !!!
+    unitTest(validate.validatePhone('+7(11-)+$#-11-11'), false, `validate.validatePhone('+7(11-)+$#-11-11')`); // TODO !!!
+    unitTest(validate.validatePhone(''), false, `validate.validatePhone('')`); // TODO !!!
+    unitTest(validate.validatePhone(' '), false, `validate.validatePhone(' ')`); // TODO !!!
+    unitTest(validate.validatePhone('999999999'), false, `validate.validatePhone('999999999')`);
+    unitTest(validate.validatePhone('+71111111111111'), false, `validate.validatePhone('+71111111111111')`); // TODO !!!
+    unitTest(validate.validatePhone('+7111'), false, `validate.validatePhone('+7111')`); // TODO !!!
+
+
+    // ----- неверный email ------
+
+/*    unitTest(validate.validateEmail('mail@ya.ru'), true, `validate.validateEmail('mail@ya.ru')`);
+    unitTest(validate.validateEmail('привет@ya.ru'), true, `validate.validateEmail('привет@ya.ru')`);
+    unitTest(validate.validateEmail('mail@@ya.ru'), false, `validate.validateEmail('mail@@ya.ru')`);
+    unitTest(validate.validateEmail('mail@ya@.ru'), false, `validate.validateEmail('mail@ya@.ru')`);
+    unitTest(validate.validateEmail('+mail@ya.ru'), false, `validate.validateEmail('+mail@ya.ru')`);// TODO !!!
+    unitTest(validate.validateEmail(' mail@ya.ru'), false, `validate.validateEmail(' mail@ya.ru')`);// TODO !!!
+    unitTest(validate.validateEmail(''), false, `validate.validateEmail('')`);
+    unitTest(validate.validateEmail(' '), false, `validate.validateEmail(' ')`);
+    unitTest(validate.validateEmail('mail@ya.ru.'), false, `validate.validateEmail('mail@ya.ru.')`);
+    unitTest(validate.validateEmail('mail@ya .ru.'), false, `validate.validateEmail('mail@ya .ru.')`);
+    unitTest(validate.validateEmail('mail@ya. ru.'), false, `validate.validateEmail('mail@ya. ru.')`);
+    unitTest(validate.validateEmail('mailya.ru'), false, `validate.validateEmail('mailya.ru')`);
+    unitTest(validate.validateEmail('mail@yammy.ru'), false, `validate.validateEmail('mail@yammy.ru')`);
+    unitTest(validate.validateEmail('@ya.ru'), false, `validate.validateEmail('@ya.ru')`);*/
+
+
+    MyForm.setData({fio: 'Иванов Иван Иванович', phone: '+7123456', email: '@ya.ru'});
 
     let form = helper.getElem('#myForm');
     form.addEventListener('submit', (e) => {
