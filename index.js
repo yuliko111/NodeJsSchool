@@ -6,14 +6,23 @@ class Helper {
     getElemByName (name) {
         return document.querySelector('input[name="' + name+ '"]');
     }
-    getElem (elem) {
-        return document.querySelector(elem);
+    getElem (selector) {
+        return document.querySelector(selector);
+    }
+    getElems (selector) {
+        return document.querySelectorAll(selector);
     }
     setValue (name, value) {
         return this.getElemByName(name).value = value;
     }
     clear () {
-        // TODO в цикле перебрать инпуты и очистить их стили
+        const inputs = this.getElems('#myForm input');
+
+        inputs.forEach(input => {
+            if (input.classList.contains('form__input_error')) {
+                input.classList.remove('form__input_error');
+            }
+        })
     }
 }
 
@@ -38,27 +47,36 @@ class Validate {
     }
 
     validatePhone (phone) {
-        let validNumber = phone.replace(/[^0-9]+/g, '');
+        const onlyNumeric = phone.replace(/[^0-9]+/g, '');
 
-        let arrNumber = validNumber.split('');
-        let result2;
-
-        if (arrNumber.length === 16 // TODO replace arrNumber to phone.split('')
-            && arrNumber[0] === '+'
-            && arrNumber[1] === '7'
-            && arrNumber[2] === '('
-            && arrNumber[6] === ')'
-            && arrNumber[10] === '-'
-            && arrNumber[13] === '-'
-        ){
-            result2 = true;
-        }
-
-        let resultSum = arrNumber.reduce(function(sum, current) {
+        const arrForSum = onlyNumeric.split('');
+        const resultSum = arrForSum.reduce(function(sum, current) {
             return parseInt(sum, 10) + parseInt(current, 10);
         }, 0);
 
-        return (resultSum <= 30 && result2);
+        const phoneArr = phone.split('');
+        let format;
+        if (phoneArr[0] === '+'
+            && phoneArr[1] === '7'
+            && phoneArr[2] === '('
+            && phoneArr[6] === ')'
+            && phoneArr[10] === '-'
+            && phoneArr[13] === '-') {
+
+            format = true;
+        } else {
+            format = false;
+        }
+        let allNumeric = true;
+        const indexesNumeric = [3, 4, 5, 7, 8, 9, 11, 12, 14, 15];
+
+        indexesNumeric.forEach(item => {
+            if (isNaN(phoneArr[item])) {
+                allNumeric = false;
+            }
+        });
+
+        return (resultSum <= 30 && format && allNumeric && phone.length === 16);
     }
 
     validateEmail (email) {
@@ -71,6 +89,7 @@ class Validate {
         return (resultDomen && resultName);
     }
 }
+
 function unitTest(func, res, name){
     if (func === res) {
         console.log('%c success ' + name, 'color: green');
@@ -78,15 +97,19 @@ function unitTest(func, res, name){
         console.log('%c failed ' + name, 'color: red');
     }
 }
+
 class API {
     sendForm (form, submitBtn, resultNode) {
         const formAction = form.getAttribute('action');
 
-        fetch('/rest/' + formAction)
+        const formData = MyForm.getData();
+
+        fetch('/rest/' + formAction + '?fio=' + encodeURIComponent(formData.fio) + '&email=' + encodeURIComponent(formData.email) + '&phone=' + encodeURIComponent(formData.phone))
             .then((resp) => {
                 return resp.json();
             })
             .then((data) => {
+
                 if (data.status !== 'success' && data.status !== 'error' && data.status !== 'progress') {
                     return;
                 }
@@ -195,14 +218,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----- неверный телефон ------
 
     unitTest(validate.validatePhone('+7(111)111-11-11'), true, `validate.validatePhone('+7(111)111-11-11')`);
-    unitTest(validate.validatePhone('+71111111111'), false, `validate.validatePhone('+71111111111')`); // TODO !!!
-    unitTest(validate.validatePhone('kasj kasjd kjd'), false, `validate.validatePhone('kasj kasjd kjd')`); // TODO !!!
-    unitTest(validate.validatePhone('+7(11-)+$#-11-11'), false, `validate.validatePhone('+7(11-)+$#-11-11')`); // TODO !!!
-    unitTest(validate.validatePhone(''), false, `validate.validatePhone('')`); // TODO !!!
-    unitTest(validate.validatePhone(' '), false, `validate.validatePhone(' ')`); // TODO !!!
+    unitTest(validate.validatePhone('+71111111111'), false, `validate.validatePhone('+71111111111')`);
+    unitTest(validate.validatePhone('kasj kasjd kjd'), false, `validate.validatePhone('kasj kasjd kjd')`);
+    unitTest(validate.validatePhone('+7(11-)+$#-11-11'), false, `validate.validatePhone('+7(11-)+$#-11-11')`);
+    unitTest(validate.validatePhone(''), false, `validate.validatePhone('')`);
+    unitTest(validate.validatePhone(' '), false, `validate.validatePhone(' ')`);
     unitTest(validate.validatePhone('999999999'), false, `validate.validatePhone('999999999')`);
-    unitTest(validate.validatePhone('+71111111111111'), false, `validate.validatePhone('+71111111111111')`); // TODO !!!
-    unitTest(validate.validatePhone('+7111'), false, `validate.validatePhone('+7111')`); // TODO !!!
+    unitTest(validate.validatePhone('+71111111111111'), false, `validate.validatePhone('+71111111111111')`);
+    unitTest(validate.validatePhone('+7111'), false, `validate.validatePhone('+7111')`);
+    unitTest(validate.validatePhone('+7(111)111-11-11--'), false, `validate.validatePhone('+7(111)111-11-11--')`);
 
 
     // ----- неверный email ------
@@ -223,13 +247,13 @@ document.addEventListener('DOMContentLoaded', () => {
     unitTest(validate.validateEmail('@ya.ru'), false, `validate.validateEmail('@ya.ru')`);*/
 
 
-    MyForm.setData({fio: 'Иванов Иван Иванович', phone: '+7123456', email: '@ya.ru'});
+    MyForm.setData({fio: 'Иванов Иван Иванович', phone: '+7(111)111-11-11', email: 'ggg@ya.ru'});
 
     let form = helper.getElem('#myForm');
     form.addEventListener('submit', (e) => {
 
         e.preventDefault();
-
+        helper.clear();
         MyForm.submit();
     });
 });
