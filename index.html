@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Form</title>
-    <link href="style.scss" rel="stylesheet" type="text/css">
+    <link href="style.css" rel="stylesheet" type="text/css">
     <script src="index.js" type="text/javascript"></script>
 </head>
 <style>
     .form__input_error {
         border: 1px solid red;
+    }
+    .form__btn[disabled] {
+        pointer-events: none;
     }
 </style>
 <body>
@@ -19,6 +22,23 @@
         <input id="submitButton" class="form__btn" type="submit"/>
     </form>
     <div id="resultContainer"></div>
+    <div class="imagine">
+        <div class="wrap-pes" id="wrap-pes1">
+            <img class="pes" id="pes1" src="img/1pes.jpg"/>
+        </div>
+        <div class="wrap-pes" id="wrap-pes2">
+            <img class="pes" id="pes2" src="img/2pes.jpg"/>
+        </div>
+        <div class="wrap-pes" id="wrap-pes3">
+            <img class="pes" id="pes3" src="img/3pes.jpg"/>
+        </div>
+        <div class="wrap-pes" id="wrap-pes4">
+            <img class="pes" id="pes4" src="img/4pes.jpg"/>
+        </div>
+        <div class="wrap-pes" id="wrap-pes5">
+            <img class="pes" id="pes5" src="img/5pes.jpg"/>
+        </div>
+    </div>
 </body>
 </html>
 
